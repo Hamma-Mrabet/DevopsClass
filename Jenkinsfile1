@@ -41,7 +41,7 @@ pipeline {
                     nexusArtifactUploader artifacts: [
                         [artifactId: artifactId, 
                          classifier: '', 
-                         file: "target/${artifactId}-${version}.${packaging}.original", 
+                         file: "target/${artifactId}-${version}.${packaging}", 
                          type: packaging]
                     ],
                     credentialsId:'nexus-cred',
