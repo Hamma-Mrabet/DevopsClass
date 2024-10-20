@@ -15,19 +15,22 @@ pipeline {
     }
 
     stages {
-        stage("Clone code from GitHub") {
+     stage('GIT') {
             steps {
-                // Clone the GitHub repository
-                git branch: "master",
-                    url: "https://github.com/hwafa/timesheetproject.git"
+                git branch: "main",
+                url: "https://github.com/Hamma-Mrabet/DevopsClass.git"
             }
         }
- stage('Build') {
+         
+
+      stage('Build') {
             steps {
                 // Assuming you are using Maven for your project
-                sh 'mvn clean install -X'
+                 sh "mvn package -DskipTests=true"
             }
         }
+
+ 
 
        
         stage("Publish to Nexus Repository Manager") {
