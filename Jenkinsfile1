@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent any  // Use any available agent
 
     environment {
         // Define environment variables
@@ -15,38 +15,35 @@ pipeline {
     }
 
     stages {
-     stage('GIT') {
+        stage('GIT') {
             steps {
                 git branch: "main",
-                url: "https://github.com/Hamma-Mrabet/DevopsClass.git"
+                url: "https://github.com/Hamma-Mrabet/DevopsClass/tree/main/timesheet-devops.git"
             }
         }
-         
 
-      stage('Build') {
+        stage('Build') {
             steps {
                 // Assuming you are using Maven for your project
-                 sh "mvn package -DskipTests=true"
+                sh "mvn package -DskipTests=true"
             }
         }
 
- 
-
-       
         stage("Publish to Nexus Repository Manager") {
             steps {
                 script {
-                    // Parse the pom.xml to get the groupId, version, and packaging
-                    def pom = readMavenPom file: 'pom.xml'
-                    def groupId = pom.groupId
-                    def artifactId = pom.artifactId
-                    def version = pom.version
-                    def packaging = pom.packaging
+                    // Manually parse the pom.xml to get the groupId, version, and packaging
+                    def pomFileContent = readFile 'pom.xml'
+                    def pom = new XmlSlurper().parseText(pomFileContent)
+                    def groupId = pom.groupId.text()
+                    def artifactId = pom.artifactId.text()
+                    def version = pom.version.text()
+                    def packaging = pom.packaging.text() ?: 'jar' // Default to 'jar' if not specified
 
                     // Find the built artifact file
                     def filesByGlob = findFiles(glob: "target/*.${packaging}")
-                    def artifactPath = filesByGlob[0].path
-                    def artifactExists = fileExists artifactPath
+                    def artifactPath = filesByGlob[0]?.path
+                    def artifactExists = artifactPath ? fileExists(artifactPath) : false
 
                     if (artifactExists) {
                         echo "Deploying ${artifactPath} to Nexus Repository Manager"
