@@ -46,7 +46,7 @@ pipeline {
                     ],
                     credentialsId:'nexus-cred',
                     groupId: 'tn.esprit.spring.services', // Replace with your group ID
-                    nexusUrl: '${NEXUS_PROTOCOL}://${NEXUS_URL}',
+                    nexusUrl: "${NEXUS_URL}",
                     repository: NEXUS_REPOSITORY,
                     version: version,
                     nexusVersion: 'nexus3'
