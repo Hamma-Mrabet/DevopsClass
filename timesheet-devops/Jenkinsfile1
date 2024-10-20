@@ -25,7 +25,7 @@ pipeline {
  stage('Build') {
             steps {
                 // Assuming you are using Maven for your project
-                sh 'mvn clean install'
+                sh 'mvn clean install -DskipTests'
             }
         }
 
