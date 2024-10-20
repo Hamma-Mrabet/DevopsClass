@@ -22,6 +22,12 @@ pipeline {
                     url: "https://github.com/hwafa/timesheetproject.git"
             }
         }
+ stage('Build') {
+            steps {
+                // Assuming you are using Maven for your project
+                sh 'mvn clean install'
+            }
+        }
 
        
         stage("Publish to Nexus Repository Manager") {
