@@ -18,7 +18,7 @@ pipeline {
      stage('GIT') {
             steps {
                 git branch: "main",
-                url: "https://github.com/Hamma-Mrabet/DevopsClass/tree/main/timesheet-devops.git"
+                url: "https://github.com/Hamma-Mrabet/DevopsClass.git"
             }
         }
          
