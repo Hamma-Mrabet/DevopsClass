@@ -1,52 +1,65 @@
 pipeline {
     agent any
+
+    environment {
+        // Define environment variables
+        NEXUS_VERSION = 'nexus3'
+        NEXUS_PROTOCOL = 'http'
+        NEXUS_URL = '192.168.28.144:8081' // Update if necessary
+        NEXUS_REPOSITORY = 'DevopsClasse' // Nexus repository name
+        CREDENTIALS_ID = 'nexus-cred'     // Jenkins credentials ID for Nexus
+    }
+
     tools {
-        maven "M2_HOME"
+        maven 'M2_HOME'  // Ensure Maven is installed on Jenkins and configured with this name
     }
 
     stages {
         stage("Clone code from GitHub") {
             steps {
-                script {
-                    git branch: "master",
-                        url: "https://github.com/hwafa/timesheetproject.git"
-                }
+                // Clone the GitHub repository
+                git branch: "master",
+                    url: "https://github.com/hwafa/timesheetproject.git"
             }
         }
-        
+
+       
         stage("Publish to Nexus Repository Manager") {
             steps {
                 script {
-                    // Use 'readFile' as an alternative to 'readMavenPom' if the error persists
-                    def pom = new XmlParser().parse(new File('pom.xml'))
-                    def packaging = pom.packaging.text()
-                    def groupId = pom.groupId.text()
-                    def version = pom.version.text()
+                    // Parse the pom.xml to get the groupId, version, and packaging
+                    def pom = readMavenPom file: 'pom.xml'
+                    def groupId = pom.groupId
+                    def artifactId = pom.artifactId
+                    def version = pom.version
+                    def packaging = pom.packaging
 
+                    // Find the built artifact file
                     def filesByGlob = findFiles(glob: "target/*.${packaging}")
-                    echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
-
                     def artifactPath = filesByGlob[0].path
                     def artifactExists = fileExists artifactPath
+
                     if (artifactExists) {
-                        echo "*** File: ${artifactPath}, group: ${groupId}, packaging: ${packaging}, version ${version}"
+                        echo "Deploying ${artifactPath} to Nexus Repository Manager"
+
+                        // Use Nexus Artifact Uploader to deploy the artifact and pom.xml to Nexus
                         nexusArtifactUploader(
-                            nexusVersion: 'nexus3',
-                            protocol: 'http',
-                            nexusUrl: '192.168.28.144:8081',
+                            nexusVersion: NEXUS_VERSION,
+                            protocol: NEXUS_PROTOCOL,
+                            nexusUrl: NEXUS_URL,
                             groupId: groupId,
                             version: version,
-                            repository: 'DevopsClasse',
-                            credentialsId: 'nexus-cred',
+                            repository: NEXUS_REPOSITORY,
+                            credentialsId: CREDENTIALS_ID,
                             artifacts: [
                                 [
-                                    artifactId: 'pom.timesheet-devops',
+                                    artifactId: artifactId,
                                     classifier: '',
                                     file: artifactPath,
                                     type: packaging
                                 ],
                                 [
-                                    artifactId: 'pom.timesheet-devops',
+                                    artifactId: artifactId,
                                     classifier: '',
                                     file: "pom.xml",
                                     type: "pom"
@@ -54,10 +67,20 @@ pipeline {
                             ]
                         )
                     } else {
-                        error "*** File: ${artifactPath}, could not be found"
+                        error "Artifact file: ${artifactPath} could not be found"
                     }
                 }
             }
+        }
+    }
+
+    post {
+        // Notifications or cleanups
+        success {
+            echo "Build and deployment to Nexus completed successfully!"
+        }
+        failure {
+            echo "Build failed. Please check the logs."
         }
     }
 }
