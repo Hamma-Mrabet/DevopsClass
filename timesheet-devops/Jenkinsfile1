@@ -3,13 +3,14 @@ pipeline {
     tools {
         maven "M2_HOME"
     }
-  
+
     stages {
         stage("Clone code from GitHub") {
             steps {
                 script {
                     git branch: "master",
-                url: "https://github.com/hwafa/timesheetproject.git"
+                        url: "https://github.com/hwafa/timesheetproject.git"
+                }
             }
         }
         stage("Maven Build") {
@@ -22,13 +23,13 @@ pipeline {
         stage("Publish to Nexus Repository Manager") {
             steps {
                 script {
-                    pom = readMavenPom file: "pom.xml";
-                    filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
+                    def pom = readMavenPom file: "pom.xml"
+                    def filesByGlob = findFiles(glob: "target/*.${pom.packaging}")
                     echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
-                    artifactPath = filesByGlob[0].path;
-                    artifactExists = fileExists artifactPath;
-                    if(artifactExists) {
-                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}";
+                    def artifactPath = filesByGlob[0].path
+                    def artifactExists = fileExists artifactPath
+                    if (artifactExists) {
+                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}"
                         nexusArtifactUploader(
                             nexusVersion: 'nexus3',
                             protocol: 'http',
@@ -38,18 +39,22 @@ pipeline {
                             repository: 'DevopsClasse',
                             credentialsId: 'nexus-cred',
                             artifacts: [
-                                [artifactId:'pom.timesheet-devops',
-                                classifier: '',
-                                file: artifactPath,
-                                type: pom.packaging],
-                                [artifactId:'pom.timesheet-devops',
-                                classifier: '',
-                                file: "pom.xml",
-                                type: "pom"]
+                                [
+                                    artifactId: 'pom.timesheet-devops',
+                                    classifier: '',
+                                    file: artifactPath,
+                                    type: pom.packaging
+                                ],
+                                [
+                                    artifactId: 'pom.timesheet-devops',
+                                    classifier: '',
+                                    file: "pom.xml",
+                                    type: "pom"
+                                ]
                             ]
-                        );
+                        )
                     } else {
-                        error "*** File: ${artifactPath}, could not be found";
+                        error "*** File: ${artifactPath}, could not be found"
                     }
                 }
             }
