@@ -5,10 +5,13 @@ pipeline {
         // Define environment variables
         NEXUS_VERSION = 'nexus3'
         NEXUS_PROTOCOL = 'http'
-        NEXUS_URL = '192.168.28.144:8081' // Nexus base URL
+        NEXUS_URL = '192.168.28.144:8081' // Update if necessary
         NEXUS_REPOSITORY = 'DevopsClasse' // Nexus repository name
         CREDENTIALS_ID = 'nexus-cred'     // Jenkins credentials ID for Nexus
-        MAVEN_HOME = tool name: 'M2_HOME' // Define Maven tool from Jenkins
+    }
+
+    tools {
+        maven 'M2_HOME'  // Ensure Maven is installed on Jenkins and configured with this name
     }
 
     stages {
@@ -23,39 +26,38 @@ pipeline {
         stage("Maven Build") {
             steps {
                 // Run Maven to package the project without running the tests
-                sh "${MAVEN_HOME}/bin/mvn package -DskipTests=true"
+                sh "mvn package -DskipTests=true"
             }
         }
 
         stage("Upload to Nexus") {
             steps {
                 script {
-                    // Artifact details
-                    def artifactId = 'timesheet-devops' // Replace with your actual artifact ID
-                    def version = '1.0'                 // Replace with your actual version
-                    def packaging = 'jar'               // Adjust according to your artifact type
+                    def artifactId = 'timesheet-devops' // Replace with your artifact ID
+                    def version = '1.0' // Replace with your version
+                    def packaging = 'jar' // Adjust according to your artifact type
 
-                    // Use Nexus Artifact Uploader plugin to upload the artifact
+                    // Use Nexus Artifact Uploader plugin
                     nexusArtifactUploader artifacts: [
-                        [
-                            artifactId: artifactId,
-                            classifier: '',
-                            file: "target/${artifactId}-${version}.${packaging}",
-                            type: packaging
-                        ]
+                        [artifactId: artifactId, 
+                         classifier: '', 
+                         file: "target/${artifactId}-${version}.${packaging}", 
+                         type: packaging]
                     ],
-                    credentialsId: CREDENTIALS_ID,
-                    groupId: 'tn.esprit.spring.services', // Replace with your actual group ID
-                    nexusUrl: "${NEXUS_PROTOCOL}://${NEXUS_URL}/repository/${NEXUS_REPOSITORY}",
-                    repository: NEXUS_REPOSITORY,
+                    credentialsId:'nexus-cred',
+                    groupId: 'tn.esprit.spring.services', // Replace with your group ID
+                    nexusUrl: "${NEXUS_PROTOCOL}://${NEXUS_URL}",
+                    repository:"/#admin/repository/repositories:${NEXUS_REPOSITORY}",
                     version: version,
-                    nexusVersion: NEXUS_VERSION
+                    nexusVersion: 'nexus3'
+
                 }
             }
         }
     }
 
     post {
+        // Notifications or cleanups
         success {
             echo "Build and deployment to Nexus completed successfully!"
         }
