@@ -34,7 +34,7 @@ pipeline {
             steps {
                 script {
                     def artifactId = 'timesheet-devops' // Replace with your artifact ID
-                    def version = '1.0.0' // Replace with your version
+                    def version = '1.0' // Replace with your version
                     def packaging = 'jar' // Adjust according to your artifact type
 
                     // Use Nexus Artifact Uploader plugin
