@@ -17,19 +17,25 @@ pipeline {
         stage("Publish to Nexus Repository Manager") {
             steps {
                 script {
-                    def pom = readMavenPom file: "pom.xml"
-                    def filesByGlob = findFiles(glob: "target/*.${pom.packaging}")
+                    // Use 'readFile' as an alternative to 'readMavenPom' if the error persists
+                    def pom = new XmlParser().parse(new File('pom.xml'))
+                    def packaging = pom.packaging.text()
+                    def groupId = pom.groupId.text()
+                    def version = pom.version.text()
+
+                    def filesByGlob = findFiles(glob: "target/*.${packaging}")
                     echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
+
                     def artifactPath = filesByGlob[0].path
                     def artifactExists = fileExists artifactPath
                     if (artifactExists) {
-                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}"
+                        echo "*** File: ${artifactPath}, group: ${groupId}, packaging: ${packaging}, version ${version}"
                         nexusArtifactUploader(
                             nexusVersion: 'nexus3',
                             protocol: 'http',
                             nexusUrl: '192.168.28.144:8081',
-                            groupId: 'pom.tn.esprit.spring.services',
-                            version: 'pom.1.0',
+                            groupId: groupId,
+                            version: version,
                             repository: 'DevopsClasse',
                             credentialsId: 'nexus-cred',
                             artifacts: [
@@ -37,7 +43,7 @@ pipeline {
                                     artifactId: 'pom.timesheet-devops',
                                     classifier: '',
                                     file: artifactPath,
-                                    type: pom.packaging
+                                    type: packaging
                                 ],
                                 [
                                     artifactId: 'pom.timesheet-devops',
