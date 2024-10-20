@@ -44,7 +44,7 @@ pipeline {
                          file: "target/${artifactId}-${version}.${packaging}", 
                          type: packaging]
                     ],
-                    credentialsId: CREDENTIALS_ID,
+                    credentialsId:'nexus-cred',
                     groupId: 'tn.esprit.spring.services', // Replace with your group ID
                     nexusUrl: "${NEXUS_PROTOCOL}://${NEXUS_URL}",
                     repository: NEXUS_REPOSITORY,
