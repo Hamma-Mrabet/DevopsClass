@@ -23,7 +23,7 @@ pipeline {
         stage("Maven Build") {
             steps {
                 // Run Maven to package the project without running the tests
-                sh "'${MAVEN_HOME}/bin/mvn' package -DskipTests=true"
+                sh "${MAVEN_HOME}/bin/mvn package -DskipTests=true"
             }
         }
 
