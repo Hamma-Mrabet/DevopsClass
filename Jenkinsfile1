@@ -46,13 +46,11 @@ pipeline {
                     ],
                     credentialsId: CREDENTIALS_ID,
                     groupId: 'tn.esprit.spring.services', // Replace with your actual group ID
-                    nexusUrl: "${NEXUS_PROTOCOL}://${NEXUS_URL}"
-                    repository: "/#admin/repository/repositories:${NEXUS_REPOSITORY}",
+                    nexusUrl: "${NEXUS_PROTOCOL}://${NEXUS_URL}/repository/${NEXUS_REPOSITORY}",
+                    repository: NEXUS_REPOSITORY,
                     version: version,
                     nexusVersion: NEXUS_VERSION
                 }
-
-               
             }
         }
     }
