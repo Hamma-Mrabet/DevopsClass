@@ -48,7 +48,9 @@ pipeline {
                     groupId: 'tn.esprit.spring.services', // Replace with your group ID
                     nexusUrl: "${NEXUS_PROTOCOL}://${NEXUS_URL}",
                     repository: NEXUS_REPOSITORY,
-                    version: version
+                    version: version,
+                    nexusVersion: 'nexus3'
+
                 }
             }
         }
