@@ -6,7 +6,7 @@ pipeline {
         NEXUS_VERSION = 'nexus3'
         NEXUS_PROTOCOL = 'http'
         NEXUS_URL = '192.168.28.144:8081' // Update if necessary
-        NEXUS_REPOSITORY = 'DevopsClasse' // Nexus repository name
+        NEXUS_REPOSITORY = 'DevopsClasse/' // Nexus repository name
         CREDENTIALS_ID = 'nexus-cred'     // Jenkins credentials ID for Nexus
     }
 
