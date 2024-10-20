@@ -19,7 +19,7 @@ pipeline {
             steps {
                 // Clone the GitHub repository
                 git branch: "main",
-                url: "https://github.com/Hamma-Mrabet/DevopsClass.git"
+                    url: "https://github.com/Hamma-Mrabet/DevopsClass.git"
             }
         }
 
@@ -30,51 +30,25 @@ pipeline {
             }
         }
 
-        stage("Publish to Nexus Repository Manager") {
+        stage("Upload to Nexus") {
             steps {
                 script {
-                    // Parse the pom.xml to get the groupId, version, and packaging
-                    def pom = readMavenPom file: 'pom.xml'
-                    def groupId = pom.groupId
-                    def artifactId = pom.artifactId
-                    def version = pom.version
-                    def packaging = pom.packaging
+                    def artifactId = 'timesheet-devops' // Replace with your artifact ID
+                    def version = '1.0.0' // Replace with your version
+                    def packaging = 'jar' // Adjust according to your artifact type
 
-                    // Find the built artifact file
-                    def filesByGlob = findFiles(glob: "target/*.${packaging}")
-                    def artifactPath = filesByGlob[0].path
-                    def artifactExists = fileExists artifactPath
-
-                    if (artifactExists) {
-                        echo "Deploying ${artifactPath} to Nexus Repository Manager"
-
-                        // Use Nexus Artifact Uploader to deploy the artifact and pom.xml to Nexus
-                        nexusArtifactUploader(
-                            nexusVersion: NEXUS_VERSION,
-                            protocol: NEXUS_PROTOCOL,
-                            nexusUrl: NEXUS_URL,
-                            groupId: groupId,
-                            version: version,
-                            repository: NEXUS_REPOSITORY,
-                            credentialsId: CREDENTIALS_ID,
-                            artifacts: [
-                                [
-                                    artifactId: artifactId,
-                                    classifier: '',
-                                    file: artifactPath,
-                                    type: packaging
-                                ],
-                                [
-                                    artifactId: artifactId,
-                                    classifier: '',
-                                    file: "pom.xml",
-                                    type: "pom"
-                                ]
-                            ]
-                        )
-                    } else {
-                        error "Artifact file: ${artifactPath} could not be found"
-                    }
+                    // Use Nexus Artifact Uploader plugin
+                    nexusArtifactUploader artifacts: [
+                        [artifactId: artifactId, 
+                         classifier: '', 
+                         file: "target/${artifactId}-${version}.${packaging}", 
+                         type: packaging]
+                    ],
+                    credentialsId: CREDENTIALS_ID,
+                    groupId: 'tn.esprit.spring.services', // Replace with your group ID
+                    nexusUrl: "${NEXUS_PROTOCOL}://${NEXUS_URL}",
+                    repository: NEXUS_REPOSITORY,
+                    version: version
                 }
             }
         }
