@@ -15,11 +15,10 @@ pipeline {
     }
 
     stages {
-        stage("Clone code from GitHub") {
+         stage('GIT') {
             steps {
-                // Clone the GitHub repository
                 git branch: "master",
-                    url: "https://github.com/hwafa/timesheetproject.git"
+                url: "https://github.com/hwafa/timesheetproject.git"
             }
         }
  
